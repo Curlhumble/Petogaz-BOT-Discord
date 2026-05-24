@@ -25,7 +25,7 @@ client.once('ready', () => {
   console.log(`✅ Bot en ligne : ${client.user.tag}`);
   client.user.setActivity('Elite Dangerous 🫣', {
     type: ActivityType.Streaming,
-    url: 'https://www.twitch.tv/ton_nom_de_chaine'
+    url: 'https://www.twitch.tv/petogaz'
   });
 });
 
