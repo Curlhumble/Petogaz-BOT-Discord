@@ -54,7 +54,33 @@ const commands = [
   new SlashCommandBuilder()
     .setName('slowmode').setDescription('Activer/désactiver le mode lent')
     .addIntegerOption(o => o.setName('duree').setDescription('Secondes (0 = désactiver)').setRequired(true).setMinValue(0).setMaxValue(21600)),
-
+  
+  // /dm
+  new SlashCommandBuilder()
+    .setName('dm')
+    .setDescription('Envoyer un message privé à des membres ou à tout un rôle')
+    .addStringOption(o =>
+      o.setName('message').setDescription('Le message à envoyer').setRequired(true)
+    )
+    .addRoleOption(o =>
+      o.setName('role').setDescription('Envoyer à tous les membres ayant ce rôle (prioritaire sur les utilisateurs)')
+    )
+    .addUserOption(o =>
+      o.setName('utilisateur1').setDescription('1er membre (optionnel si un rôle est choisi)')
+    )
+    .addUserOption(o =>
+      o.setName('utilisateur2').setDescription('2ème membre (optionnel)')
+    )
+    .addUserOption(o =>
+      o.setName('utilisateur3').setDescription('3ème membre (optionnel)')
+    )
+    .addUserOption(o =>
+      o.setName('utilisateur4').setDescription('4ème membre (optionnel)')
+    )
+    .addUserOption(o =>
+      o.setName('utilisateur5').setDescription('5ème membre (optionnel)')
+    ),
+  
   // /userinfo
   new SlashCommandBuilder()
     .setName('userinfo').setDescription('Voir les infos d\'un utilisateur')
