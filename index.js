@@ -355,7 +355,7 @@ client.on('messageCreate', async message => {
   await staffChannel.send({ embeds: [embed] });
 
   // Accusé de réception automatique envoyé au membre
-  await message.reply('✅ Ton message a bien été reçu par le staff. Nous te répondrons dès que possible !');
+  await message.reply('👍');
 });
 // Connexion du bot
 client.login(process.env.TOKEN);
