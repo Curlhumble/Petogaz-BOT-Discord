@@ -269,7 +269,7 @@ client.on('interactionCreate', async interaction => {
         try {
           const embed = new EmbedBuilder()
             .setColor('#7289DA')
-            .setTitle('📩 Message du staff')
+            .setTitle('📩 Nouveau message 📩')
             .setDescription(message)
             .setFooter({ text: `Serveur : ${interaction.guild.name}` })
             .setTimestamp();
