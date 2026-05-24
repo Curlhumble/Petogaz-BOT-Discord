@@ -21,7 +21,7 @@ const client = new Client({
 // Quand le bot se connecte
 client.once('ready', () => {
   console.log(`✅ Bot en ligne : ${client.user.tag}`);
-  client.user.setActivity('Si je ne répond pas, c'est que je tryhard sur Elite Dangerous 🫣​', { type: 3 });
+  client.user.setActivity('Elite Dangerous 🫣​', { type: 1 });
 });
 
 // Quand quelqu'un utilise une commande slash
