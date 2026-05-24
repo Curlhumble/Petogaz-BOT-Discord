@@ -1,6 +1,6 @@
 require('dotenv').config();
 const {
-  Client, GatewayIntentBits,
+  Client, GatewayIntentBits, Partials, ChannelType,
   PermissionFlagsBits, EmbedBuilder
 } = require('discord.js');
 
@@ -11,7 +11,11 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-  ]
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.DirectMessageTyping,
+    GatewayIntentBits.DirectMessageReactions,
+  ],
+  partials: [Partials.Channel, Partials.Message],
 });
 
 // Quand le bot se connecte
@@ -321,7 +325,7 @@ client.on('messageCreate', async message => {
   if (message.author.bot) return;
 
   // On vérifie que c'est bien un DM (type 1 = message privé)
-  if (message.channel.type !== 1) return;
+  if (message.channel.type !== ChannelType.DM) return;
 
   const guild = client.guilds.cache.first();
   if (!guild) return;
