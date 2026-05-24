@@ -19,16 +19,13 @@ const client = new Client({
 });
 
 // Quand le bot se connecte
+const { ActivityType } = require('discord.js');
+
 client.once('ready', () => {
   console.log(`✅ Bot en ligne : ${client.user.tag}`);
-
-  client.user.setPresence({
-    activities: [{
-      name: 'Elite Dangerous 🫣​',
-      type: ActivityType.Streaming,
-      url: 'https://twitch.tv/petogaz'
-    }],
-    status: 'online'
+  client.user.setActivity('Elite Dangerous 🫣', {
+    type: ActivityType.Streaming,
+    url: 'https://www.twitch.tv/ton_nom_de_chaine'
   });
 });
 
