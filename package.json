@@ -1,0 +1,14 @@
+{
+  "name": "mon-bot-discord",
+  "version": "1.0.0",
+  "description": "Bot Discord pour serveur streamer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.0",
+    "dotenv": "^16.4.0"
+  }
+}

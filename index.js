@@ -1,0 +1,233 @@
+require('dotenv').config();
+const {
+  Client, GatewayIntentBits,
+  PermissionFlagsBits, EmbedBuilder
+} = require('discord.js');
+
+// Création du bot avec les permissions nécessaires
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ]
+});
+
+// Quand le bot se connecte
+client.once('ready', () => {
+  console.log(`✅ Bot en ligne : ${client.user.tag}`);
+  client.user.setActivity('le serveur 👀', { type: 3 });
+});
+
+// Quand quelqu'un utilise une commande slash
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  try {
+    const cmd = interaction.commandName;
+
+    // ─── /warn ───────────────────────────────────────────
+    if (cmd === 'warn') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const user   = interaction.options.getUser('utilisateur');
+      const raison = interaction.options.getString('raison') || 'Aucune raison';
+      const embed  = new EmbedBuilder()
+        .setColor('#FFA500').setTitle('⚠️ Avertissement')
+        .addFields(
+          { name: 'Utilisateur', value: `${user}`, inline: true },
+          { name: 'Modérateur',  value: `${interaction.user}`, inline: true },
+          { name: 'Raison',      value: raison }
+        ).setTimestamp();
+      try { await user.send({ embeds: [embed] }); } catch {}
+      await interaction.reply({ embeds: [embed] });
+    }
+
+    // ─── /mute ───────────────────────────────────────────
+    if (cmd === 'mute') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const user   = interaction.options.getUser('utilisateur');
+      const duree  = interaction.options.getInteger('duree');
+      const raison = interaction.options.getString('raison') || 'Aucune raison';
+      const member = interaction.guild.members.cache.get(user.id);
+      if (!member) return interaction.reply({ content: '❌ Membre introuvable.', ephemeral: true });
+
+      await member.timeout(duree * 60 * 1000, raison);
+      const embed = new EmbedBuilder()
+        .setColor('#FF0000').setTitle('🔇 Mute')
+        .addFields(
+          { name: 'Utilisateur', value: `${user}`, inline: true },
+          { name: 'Durée', value: `${duree} minute(s)`, inline: true },
+          { name: 'Modérateur', value: `${interaction.user}`, inline: true },
+          { name: 'Raison', value: raison }
+        ).setTimestamp();
+      await interaction.reply({ embeds: [embed] });
+    }
+
+    // ─── /unmute ──────────────────────────────────────────
+    if (cmd === 'unmute') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const user   = interaction.options.getUser('utilisateur');
+      const member = interaction.guild.members.cache.get(user.id);
+      if (!member) return interaction.reply({ content: '❌ Membre introuvable.', ephemeral: true });
+      await member.timeout(null);
+      await interaction.reply({ content: `✅ ${user} a été unmute.` });
+    }
+
+    // ─── /ban ────────────────────────────────────────────
+    if (cmd === 'ban') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const user   = interaction.options.getUser('utilisateur');
+      const raison = interaction.options.getString('raison') || 'Aucune raison';
+      try {
+        await interaction.guild.members.ban(user.id, { reason: raison });
+        const embed = new EmbedBuilder()
+          .setColor('#8B0000').setTitle('🔨 Ban')
+          .addFields(
+            { name: 'Utilisateur', value: `${user.tag}`, inline: true },
+            { name: 'Modérateur',  value: `${interaction.user.tag}`, inline: true },
+            { name: 'Raison',      value: raison }
+          ).setTimestamp();
+        await interaction.reply({ embeds: [embed] });
+      } catch {
+        await interaction.reply({ content: '❌ Impossible de bannir.', ephemeral: true });
+      }
+    }
+
+    // ─── /unban ───────────────────────────────────────────
+    if (cmd === 'unban') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const userId = interaction.options.getString('userid');
+      try {
+        await interaction.guild.members.unban(userId);
+        await interaction.reply({ content: `✅ Utilisateur débanni.` });
+      } catch {
+        await interaction.reply({ content: '❌ ID invalide ou utilisateur non banni.', ephemeral: true });
+      }
+    }
+
+    // ─── /kick ───────────────────────────────────────────
+    if (cmd === 'kick') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const user   = interaction.options.getUser('utilisateur');
+      const raison = interaction.options.getString('raison') || 'Aucune raison';
+      const member = interaction.guild.members.cache.get(user.id);
+      if (!member) return interaction.reply({ content: '❌ Membre introuvable.', ephemeral: true });
+      try {
+        await member.kick(raison);
+        const embed = new EmbedBuilder()
+          .setColor('#FF4500').setTitle('👢 Kick')
+          .addFields(
+            { name: 'Utilisateur', value: `${user.tag}`, inline: true },
+            { name: 'Modérateur',  value: `${interaction.user.tag}`, inline: true },
+            { name: 'Raison',      value: raison }
+          ).setTimestamp();
+        await interaction.reply({ embeds: [embed] });
+      } catch {
+        await interaction.reply({ content: '❌ Impossible de kicker.', ephemeral: true });
+      }
+    }
+
+    // ─── /annonce ─────────────────────────────────────────
+    if (cmd === 'annonce') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const texte  = interaction.options.getString('message');
+      const titre  = interaction.options.getString('titre') || '📢 Annonce';
+      const salon  = interaction.options.getChannel('salon') || interaction.channel;
+      const couleur= interaction.options.getString('couleur') || '#7289DA';
+
+      const embed = new EmbedBuilder()
+        .setColor(couleur).setTitle(titre).setDescription(texte)
+        .setTimestamp()
+        .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() });
+
+      await salon.send({ embeds: [embed] });
+      await interaction.reply({ content: `✅ Annonce envoyée dans ${salon} !`, ephemeral: true });
+    }
+
+    // ─── /clear ───────────────────────────────────────────
+    if (cmd === 'clear') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const nb = interaction.options.getInteger('nombre');
+      await interaction.channel.bulkDelete(nb, true);
+      await interaction.reply({ content: `✅ ${nb} messages supprimés.`, ephemeral: true });
+    }
+
+    // ─── /slowmode ────────────────────────────────────────
+    if (cmd === 'slowmode') {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels))
+        return interaction.reply({ content: '❌ Tu n\'as pas la permission.', ephemeral: true });
+
+      const duree = interaction.options.getInteger('duree');
+      await interaction.channel.setRateLimitPerUser(duree);
+      const msg = duree === 0
+        ? '✅ Slowmode désactivé.'
+        : `✅ Slowmode réglé à ${duree} seconde(s).`;
+      await interaction.reply({ content: msg, ephemeral: true });
+    }
+
+    // ─── /userinfo ────────────────────────────────────────
+    if (cmd === 'userinfo') {
+      const user   = interaction.options.getUser('utilisateur') || interaction.user;
+      const member = interaction.guild.members.cache.get(user.id);
+      const roles  = member?.roles.cache
+        .filter(r => r.name !== '@everyone')
+        .map(r => r.toString()).join(', ') || 'Aucun';
+
+      const embed = new EmbedBuilder()
+        .setColor('#7289DA').setTitle(`👤 Infos : ${user.tag}`)
+        .setThumbnail(user.displayAvatarURL())
+        .addFields(
+          { name: '🆔 ID', value: user.id, inline: true },
+          { name: '📅 Compte créé', value: ``, inline: true },
+          { name: '📥 A rejoint', value: member ? `` : 'Inconnu', inline: true },
+          { name: '🎭 Rôles', value: roles }
+        ).setTimestamp();
+      await interaction.reply({ embeds: [embed] });
+    }
+
+    // ─── /serverinfo ─────────────────────────────────────
+    if (cmd === 'serverinfo') {
+      const g = interaction.guild;
+      const embed = new EmbedBuilder()
+        .setColor('#7289DA').setTitle(`🏠 ${g.name}`)
+        .setThumbnail(g.iconURL())
+        .addFields(
+          { name: '👑 Propriétaire', value: `<@${g.ownerId}>`, inline: true },
+          { name: '👥 Membres', value: `${g.memberCount}`, inline: true },
+          { name: '📅 Créé le', value: ``, inline: true },
+          { name: '💬 Salons', value: `${g.channels.cache.size}`, inline: true },
+          { name: '🎭 Rôles', value: `${g.roles.cache.size}`, inline: true }
+        ).setTimestamp();
+      await interaction.reply({ embeds: [embed] });
+    }
+
+  } catch (err) {
+    console.error('Erreur commande:', err);
+    const msg = { content: '❌ Une erreur est survenue.', ephemeral: true };
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(msg);
+    } else {
+      await interaction.reply(msg);
+    }
+  }
+});
+
+// Connexion du bot
+client.login(process.env.TOKEN);
