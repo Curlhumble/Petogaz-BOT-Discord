@@ -21,7 +21,15 @@ const client = new Client({
 // Quand le bot se connecte
 client.once('ready', () => {
   console.log(`✅ Bot en ligne : ${client.user.tag}`);
-  client.user.setActivity('Elite Dangerous 🫣​', { type: 1 });
+
+  client.user.setPresence({
+    activities: [{
+      name: 'Elite Dangerous 🫣​',
+      type: ActivityType.Streaming,
+      url: 'https://twitch.tv/petogaz'
+    }],
+    status: 'online'
+  });
 });
 
 // Quand quelqu'un utilise une commande slash
