@@ -1,10 +1,4 @@
 require('dotenv').config();
-const Anthropic = require('@anthropic-ai/sdk');
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-// Mémoire de conversation par salon
-const conversationHistory = new Map();
-const MAX_HISTORY = 10; // Nombre de messages mémorisés
 const {
   Client, GatewayIntentBits, Partials, ChannelType,
   PermissionFlagsBits, EmbedBuilder
@@ -369,77 +363,4 @@ client.on('messageCreate', async message => {
   await message.reply('👍');
 });
 // Connexion du bot
-// ─── IA : répond quand le bot est mentionné ──────────────
-client.on('messageCreate', async message => {
-  if (message.author.bot) return;
-  if (!message.guild) return; // Ignore les DMs
-  if (!message.mentions.has(client.user)) return;
-
-  // ════════════════════════════════════════
-  //   PERSONNALISE ICI la personnalité
-  // ════════════════════════════════════════
-  const systemPrompt = `Tu es la personnalité IA officiel de [Petogaz].
-Tu t'appelles [PetoGOAT] et tu es chaleureux, fun et proche de la communauté.
-
-À propos du streamer :
-- Il s'appelle [Petogaz], il stream sur Twitch
-- Il joue principalement à [Elite Dangerous, Escape From Trakov et pleins d'autres jeux]
-- Sa communauté s'appelle [Le Peuple]
-
-Règles du serveur :
-- Être respectueux envers tout le monde
-- Pas de spam ni de pub non autorisée
-- Pas de propos discriminatoire ni raciale
-
-Comment tu parles :
-- Tu tutoies tout le monde
-- Tu utilises des emojis avec modération
-- Tu réponds toujours en français
-- Tu restes dans le thème gaming/stream
-- Tu dis honnêtement quand tu ne sais pas quelque chose et de demander au vrai Petogaz
-- Tu ne diras jamais "pain au chocolat" mais toujours "chocolatine";
-  // ════════════════════════════════════════
-
-  if (!userMessage)
-    return message.reply('Tu voulais me dire quelque chose ? 😊');
-
-  // Historique par salon
-  const channelId = message.channel.id;
-  if (!conversationHistory.has(channelId))
-    conversationHistory.set(channelId, []);
-  const history = conversationHistory.get(channelId);
-
-  history.push({
-    role: 'user',
-    content: `${message.author.username} : ${userMessage}`
-  });
-
-  if (history.length > MAX_HISTORY)
-    history.splice(0, history.length - MAX_HISTORY);
-
-  await message.channel.sendTyping();
-
-  try {
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 500,
-      system: systemPrompt,
-      messages: history,
-    });
-
-    const reply = response.content[0].text;
-    history.push({ role: 'assistant', content: reply });
-
-    if (reply.length <= 2000) {
-      await message.reply(reply);
-    } else {
-      const chunks = reply.match(/.{1,1990}/gs) || [];
-      for (const chunk of chunks) await message.channel.send(chunk);
-    }
-
-  } catch (err) {
-    console.error('Erreur API Anthropic:', err);
-    await message.reply('Désolé, problème technique ! Réessaie dans un moment 🙏');
-  }
-});
 client.login(process.env.TOKEN);
