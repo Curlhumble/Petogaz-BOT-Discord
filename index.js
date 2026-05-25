@@ -400,9 +400,6 @@ Comment tu parles :
 - Tu ne diras jamais "pain au chocolat" mais toujours "chocolatine";
   // ════════════════════════════════════════
 
-  const userMessage = message.content
-    .replace(`<@${client.user.id}>`, '').trim();
-
   if (!userMessage)
     return message.reply('Tu voulais me dire quelque chose ? 😊');
 
