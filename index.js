@@ -1,10 +1,4 @@
 require('dotenv').config();
-const Anthropic = require('@anthropic-ai/sdk');
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-// Mémoire de conversation par salon
-const conversationHistory = new Map();
-const MAX_HISTORY = 10; // Nombre de messages mémorisés
 const {
   Client, GatewayIntentBits, Partials, ChannelType,
   PermissionFlagsBits, EmbedBuilder
@@ -275,7 +269,7 @@ client.on('interactionCreate', async interaction => {
         try {
           const embed = new EmbedBuilder()
             .setColor('#7289DA')
-            .setTitle('📩 Nouveau message 📩')
+            .setTitle('📩 Message du staff')
             .setDescription(message)
             .setFooter({ text: `Serveur : ${interaction.guild.name}` })
             .setTimestamp();
@@ -369,56 +363,4 @@ client.on('messageCreate', async message => {
   await message.reply('👍');
 });
 // Connexion du bot
-// ─── IA : répond quand le bot est mentionné ──────────────
-client.on('messageCreate', async message => {
-  if (message.author.bot) return;
-  if (!message.guild) return;
-  if (!message.mentions.has(client.user)) return;
-
-  const systemPrompt = 'Tu es la personnalité IA officiel de [Petogaz]. Tu t\'appelles [PetoGOAT] et tu es chaleureux, fun et proche de la communauté. Tu réponds toujours en français. Tu tutoies tout le monde. Tu utilises des emojis avec modération.';
-
-  const userMessage = message.content
-    .replace('<@' + client.user.id + '>', '').trim();
-
-  if (!userMessage)
-    return message.reply('Tu voulais me dire quelque chose ? 😊');
-
-  const channelId = message.channel.id;
-  if (!conversationHistory.has(channelId))
-    conversationHistory.set(channelId, []);
-  const history = conversationHistory.get(channelId);
-
-  history.push({
-    role: 'user',
-    content: message.author.username + ' : ' + userMessage
-  });
-
-  if (history.length > MAX_HISTORY)
-    history.splice(0, history.length - MAX_HISTORY);
-
-  await message.channel.sendTyping();
-
-  try {
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 500,
-      system: systemPrompt,
-      messages: history,
-    });
-
-    const reply = response.content[0].text;
-    history.push({ role: 'assistant', content: reply });
-
-    if (reply.length <= 2000) {
-      await message.reply(reply);
-    } else {
-      const chunks = reply.match(/.{1,1990}/gs) || [];
-      for (const chunk of chunks) await message.channel.send(chunk);
-    }
-
-  } catch (err) {
-    console.error('Erreur API Anthropic:', err);
-    await message.reply('Désolé, problème technique ! Réessaie dans un moment 🙏');
-  }
-});
 client.login(process.env.TOKEN);
