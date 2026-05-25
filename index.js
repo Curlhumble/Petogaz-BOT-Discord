@@ -372,41 +372,17 @@ client.on('messageCreate', async message => {
 // ─── IA : répond quand le bot est mentionné ──────────────
 client.on('messageCreate', async message => {
   if (message.author.bot) return;
-  if (!message.guild) return; // Ignore les DMs
+  if (!message.guild) return;
   if (!message.mentions.has(client.user)) return;
 
-  // ════════════════════════════════════════
-  //   PERSONNALISE ICI la personnalité
-  // ════════════════════════════════════════
-  const systemPrompt = `Tu es la personnalité IA officiel de [Petogaz].
-Tu t'appelles [PetoGOAT] et tu es chaleureux, fun et proche de la communauté.
-
-À propos du streamer :
-- Il s'appelle [Petogaz], il stream sur Twitch
-- Il joue principalement à [Elite Dangerous, Escape From Trakov et pleins d'autres jeux]
-- Sa communauté s'appelle [Le Peuple]
-
-Règles du serveur :
-- Être respectueux envers tout le monde
-- Pas de spam ni de pub non autorisée
-- Pas de propos discriminatoire ni raciale
-
-Comment tu parles :
-- Tu tutoies tout le monde
-- Tu utilises des emojis avec modération
-- Tu réponds toujours en français
-- Tu restes dans le thème gaming/stream
-- Tu dis honnêtement quand tu ne sais pas quelque chose et de demander au vrai Petogaz
-- Tu ne diras jamais "pain au chocolat" mais toujours "chocolatine";
-  // ════════════════════════════════════════
+  const systemPrompt = 'Tu es la personnalité IA officiel de [Petogaz]. Tu t\'appelles [PetoGOAT] et tu es chaleureux, fun et proche de la communauté. Tu réponds toujours en français. Tu tutoies tout le monde. Tu utilises des emojis avec modération.';
 
   const userMessage = message.content
-  .replace('<@' + client.user.id + '>', '').trim();
+    .replace('<@' + client.user.id + '>', '').trim();
 
   if (!userMessage)
     return message.reply('Tu voulais me dire quelque chose ? 😊');
 
-  // Historique par salon
   const channelId = message.channel.id;
   if (!conversationHistory.has(channelId))
     conversationHistory.set(channelId, []);
@@ -414,7 +390,7 @@ Comment tu parles :
 
   history.push({
     role: 'user',
-    content: `${message.author.username} : ${userMessage}`
+    content: message.author.username + ' : ' + userMessage
   });
 
   if (history.length > MAX_HISTORY)
